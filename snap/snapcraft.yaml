@@ -1,0 +1,65 @@
+name: pi-sensor-libs
+base: core18
+version: '0.1'
+summary: content snap to share many/most libraries to access Pi peripherials
+description: |
+  This is my-snap's description. You have a paragraph or two to tell the
+  most important story about your snap. Keep it under 100 words though,
+  we live in tweetspace and your description wants to look good in the snap
+  store.
+
+grade: stable
+confinement: strict
+
+parts:
+  sensor-libs:
+    plugin: python
+    python-version: python2
+    python-packages:
+      - RPi.GPIO
+      - RPi.bme280
+      - Adafruit_Python_DHT
+      - adafruit-mcp3008
+      - mcp3008
+      - picamera
+      - pyserial
+      - rpi-ws281x
+      - unicornhat
+    build-packages:
+      - libssl-dev
+      - libffi-dev
+      - python-dev
+      - python-pil
+      - python-smbus
+    build-environment:
+      - READTHEDOCS: 'True'
+    stage-packages:
+      - coreutils
+      - bluetooth
+      - bluez
+      - i2c-tools
+      - libbluetooth3
+      - libbluetooth-dev
+      - libffi6
+      - libffi-dev
+      - libi2c-dev
+      - libssl1.0.0
+      - libssl-dev
+      - libudev1
+      - libudev-dev
+      - libusb-1.0-0
+      - libusb-1.0-0-dev
+      - procps
+      - python-minimal
+      - python-pil
+      - python-smbus
+    override-pull: |
+      snapcraftctl pull
+      # hack to make adafruit dht lib always build for pi(2/3/4)
+      tar xf ../python-packages/Adafruit_Python_DHT-1.4.0.tar.gz
+      plat_detect="Adafruit_Python_DHT-1.4.0/Adafruit_DHT/platform_detect.py"
+      sed -i '/^.*# Handle R.*/a \    return RASPBERRY_PI' $plat_detect
+      sed -i '/^.*# Revision list.*/a \    return 2' $plat_detect
+      sed -i '/^.*# Anything else.*/a \    return 3' $plat_detect
+      tar czf ../python-packages/Adafruit_Python_DHT-1.4.0.tar.gz Adafruit_Python_DHT-1.4.0
+      rm -rf Adafruit_Python_DHT-1.4.0 
